@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<robot name="crazyflie">
+    <webots>
+         <plugin type="crazyflie_server.cf_driver.CrazyflieDriverNode">
+            <parameterName>someValue</parameterName>
+        </plugin>
+    </webots>
+</robot>
+
