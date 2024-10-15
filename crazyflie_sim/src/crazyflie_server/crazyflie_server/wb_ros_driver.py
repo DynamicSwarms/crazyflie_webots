@@ -14,12 +14,11 @@ class WebotsRosDriver:
         self.rotation_field = self.wb_node.getField('rotation')
         self.tf_broadcaster = TransformBroadcaster(self.ros_node)
 
-        self.log("Node stared for " + str(self.getName()))
-
+        self.log("Node started for " + str(self.getName()))
+        
     def step(self):
         rclpy.spin_once(self.ros_node, timeout_sec = 0)
         self.broadcast_position()
-
 
     def getNode(self, node):
         __ros_robot = node.robot

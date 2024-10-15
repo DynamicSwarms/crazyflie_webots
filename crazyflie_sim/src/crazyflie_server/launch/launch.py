@@ -24,7 +24,7 @@ def generate_launch_description():
     #    respawn = True
     #))
     
-    proc = ExecuteProcess(
+    wand = ExecuteProcess(
         name="Wand",
         cmd=[get_package_share_directory('webots_ros2_driver') + "/scripts/webots-controller --robot-name=Wand01_ros_ctrl --protocol=tcp --port=1234 --ip-address=192.168.56.1 --port=1234 ros2 --ros-args -p robot_description:=" + package_dir +  "/resource/wand.urdf"],
         output="screen",
@@ -32,8 +32,19 @@ def generate_launch_description():
         emulate_tty=True,
         additional_env={'WEBOTS_HOME': get_package_prefix('webots_ros2_driver')}
         )
-        
     
-    nodes.append(proc)
+    
+    nodes.append(wand)
+
+    crazyflie = ExecuteProcess(
+        name="Crazyflie",
+        cmd=[get_package_share_directory('webots_ros2_driver') + "/scripts/webots-controller --robot-name=cf0_ros_ctrl --protocol=tcp --port=1234 --ip-address=192.168.56.1 --port=1234 ros2 --ros-args -p robot_description:=" + package_dir +  "/resource/cf.urdf"],
+        output="screen",
+        shell=True,
+        emulate_tty=True,
+        additional_env={'WEBOTS_HOME': get_package_prefix('webots_ros2_driver')}
+    )
+    
+    nodes.append(crazyflie)
     
     return LaunchDescription(nodes)
