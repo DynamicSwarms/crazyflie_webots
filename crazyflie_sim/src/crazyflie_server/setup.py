@@ -26,7 +26,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'crazyflie_server = crazyflie_server.crazyflie_server:main'
         ],
     },
 )
