@@ -1,16 +1,11 @@
 from setuptools import find_packages, setup
-from glob import glob
-import os
 
-package_name = 'crazyflie_server'
+package_name = 'crazyflie_webots_examples'
+
 data_files = []
 data_files.append(('share/ament_index/resource_index/packages', ['resource/' + package_name]))
 data_files.append(('share/' + package_name, ['package.xml']))
-data_files.append(('share/' + package_name + '/launch', ['launch/launch.py']))
 
-for path in glob('resource/**', recursive=True):
-    if not os.path.isfile(path): continue
-    data_files.append((os.path.join('share', package_name, os.path.split(path)[0]), [path]))
 
 setup(
     name=package_name,
@@ -26,6 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'crazyflie = crazyflie_webots_examples.crazyflie_example:main'
         ],
     },
 )

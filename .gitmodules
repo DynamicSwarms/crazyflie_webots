@@ -1,3 +1,3 @@
-[submodule "crazyflie_sim/src/crazyflie_interfaces"]
-	path = crazyflie_sim/src/crazyflie_interfaces
-	url = https://github.com/DynamicSwarms/crazyflie_interfaces
+[submodule "src/crazyflie_interfaces"]
+	path = src/crazyflie_interfaces
+	url = https://github.com/DynamicSwarms/crazyflie_interfaces.git

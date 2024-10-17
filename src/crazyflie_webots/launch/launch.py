@@ -11,7 +11,7 @@ def create_command(robot_name, description_path):
     return webots_controller_path + " --robot-name=" + robot_name + " --protocol=tcp --ip-address=" + str(webots_ip) + " --port=1234 ros2 --ros-args -p robot_description:=" + description_path
 
 def generate_launch_description():
-    package_dir = get_package_share_directory('crazyflie_server')
+    package_dir = get_package_share_directory('crazyflie_webots')
     
     nodes = []
     

@@ -1,6 +1,6 @@
 import rclpy
 
-from crazyflie_server.wb_ros_driver import WebotsRosDriver
+from crazyflie_webots.wb_ros_driver import WebotsRosDriver
 from geometry_msgs.msg import Twist
 
 class WandDriverNode(WebotsRosDriver):

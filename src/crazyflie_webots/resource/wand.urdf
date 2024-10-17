@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="wand">
     <webots>
-        <plugin type="crazyflie_server.wand_driver.WandDriverNode">
+        <plugin type="crazyflie_webots.wand_driver.WandDriverNode">
             <parameterName>someValue</parameterName>
         </plugin>
     </webots>

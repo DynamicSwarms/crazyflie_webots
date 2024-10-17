@@ -1,6 +1,6 @@
 
 import time
-from crazyflie.crazyflie_client import Crazyflie
+from crazyflie_webots_examples.crazyflie_client import Crazyflie
 
 def main():
 
