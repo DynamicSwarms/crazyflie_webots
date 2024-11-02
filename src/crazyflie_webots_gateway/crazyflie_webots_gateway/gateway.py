@@ -74,33 +74,34 @@ class Gateway(Node):
 
     async def _create_cf(self, id: int):
         cmd = self._create_start_command(id)
-        self.crazyflies[id] = await asyncio.create_subprocess_shell(
-            cmd, preexec_fn=os.setsid
+        self.crazyflies[id] = await asyncio.create_subprocess_exec(
+            *cmd, preexec_fn=os.setsid
         )
         await self.crazyflies[id].wait()
 
     def _create_start_command(self, id: int) -> str:
         robot_name = "cf{}_ros_ctrl".format(id)
 
-        return (
-            "WEBOTS_HOME={} ".format(self._webots_home)
-            + self._webots_controller_path
-            + " --robot-name={}".format(robot_name)
-            + " --protocol=tcp"
-            + " --ip-address={}".format(self._webots_ip)
-            + " --port={}".format(self._webots_port)
-            + " ros2 --ros-args -p"
-            + " robot_description:={}".format(self._cf_description_path)
-        )
+        return [
+            "env",
+            "WEBOTS_HOME={}".format(self._webots_home),
+            self._webots_controller_path,
+            "--robot-name={}".format(robot_name),
+            "--protocol=tcp",
+            "--ip-address={}".format(self._webots_ip),
+            "--port={}".format(self._webots_port),
+            "ros2",
+            "--ros-args",
+            "-p",
+            "robot_description:={}".format(self._cf_description_path),
+        ]
 
     def _load_paths_and_directories(self):
+        self._webots_home = get_package_prefix("webots_ros2_driver")
+
         self._webots_controller_path = (
             get_package_share_directory("webots_ros2_driver")
             + "/scripts/webots-controller"
-        )
-
-        self._cf_description_path = os.path.join(
-            get_package_share_directory("crazyflie_webots"), "resource", "cf.urdf"
         )
 
         self._webots_ip = EnvironmentVariable(
@@ -111,7 +112,9 @@ class Gateway(Node):
             "WEBOTS_PORT", default_value="1234"
         ).perform(LaunchContext())
 
-        self._webots_home = get_package_prefix("webots_ros2_driver")
+        self._cf_description_path = os.path.join(
+            get_package_share_directory("crazyflie_webots"), "resource", "cf.urdf"
+        )
 
     def _add_crazyflie_callback(
         self, req: WebotsCrazyflie.Request, resp: WebotsCrazyflie.Response
