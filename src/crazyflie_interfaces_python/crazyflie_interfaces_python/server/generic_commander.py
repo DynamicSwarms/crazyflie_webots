@@ -15,6 +15,7 @@ from typing import List
 
 class GenericCommanderServer(ABC):
     def __init__(self, node: Node):
+        self.node = node
         callback_group = MutuallyExclusiveCallbackGroup()
         qos_profile = 10
 
@@ -67,7 +68,7 @@ class GenericCommanderServer(ABC):
         Args:
             remain_valid_millisecs (int): _description_
         """
-        pass
+        self.__warn_not_implemented("notify_setpoints_stop")
 
     @abstractmethod
     def velocity_world_setpoint(
@@ -83,7 +84,7 @@ class GenericCommanderServer(ABC):
             vz (float): _description_
             yawrate (float): _description_
         """
-        pass
+        self.__warn_not_implemented("velocity_world_setpoint")
 
     @abstractmethod
     def hover_setpoint(
@@ -99,7 +100,7 @@ class GenericCommanderServer(ABC):
             yawrate (float): _description_
             z_distance (float): _description_
         """
-        pass
+        self.__warn_not_implemented("hover_setpoint")
 
     @abstractmethod
     def full_state_setpoint(
@@ -119,7 +120,7 @@ class GenericCommanderServer(ABC):
             orienation (List[int]): _description_
             rates (List[int]): _description_
         """
-        pass
+        self.__warn_not_implemented("full_state_setpoint")
 
     @abstractmethod
     def position_setpoint(self, x: float, y: float, z: float, yaw: float) -> None:
@@ -131,7 +132,7 @@ class GenericCommanderServer(ABC):
             z (float): _description_
             yaw (float): _description_
         """
-        pass
+        self.__warn_not_implemented("position_setpoint")
 
     def _notify_setpoints_stop(self, msg: NotifySetpointsStop) -> None:
         self.notify_setpoints_stop(msg.remain_valid_millisecs)
@@ -159,3 +160,8 @@ class GenericCommanderServer(ABC):
 
     def _cmd_position(self, msg: Position) -> None:
         self.position_setpoint(msg.x, msg.y, msg.z, msg.yaw)
+
+    def __warn_not_implemented(self, function_name: str) -> None:
+        self.node.get_logger().warn(
+            "There is no server-side implementation for {}!".format(function_name)
+        )

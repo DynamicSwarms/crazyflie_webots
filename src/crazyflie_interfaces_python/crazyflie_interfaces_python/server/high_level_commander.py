@@ -19,6 +19,7 @@ from crazyflie_interfaces.msg import (
 
 class HighLevelCommanderServer(ABC):
     def __init__(self, node: Node):
+        self.node = node
         callback_group = MutuallyExclusiveCallbackGroup()
         qos_profile = 10
 
@@ -109,7 +110,7 @@ class HighLevelCommanderServer(ABC):
         Args:
             group_mask (float): _description_
         """
-        pass
+        self.__warn_not_implemented("set_group_mask")
 
     @abstractmethod
     def takeoff(
@@ -129,7 +130,7 @@ class HighLevelCommanderServer(ABC):
             use_current_yaw (bool): Wheater yaw is valid or current yaw should be maintained
             duration_seconds (float): The time it should take to reach the height
         """
-        pass
+        self.__warn_not_implemented("takeoff")
 
     @abstractmethod
     def land(
@@ -149,7 +150,7 @@ class HighLevelCommanderServer(ABC):
             use_current_yaw (bool): _description_
             duration_seconds (float): _description_
         """
-        pass
+        self.__warn_not_implemented("land")
 
     @abstractmethod
     def stop(self, group_mask: int) -> None:
@@ -160,7 +161,7 @@ class HighLevelCommanderServer(ABC):
         Args:
             group_mask (int): _description_
         """
-        pass
+        self.__warn_not_implemented("stop")
 
     @abstractmethod
     def go_to(
@@ -186,7 +187,7 @@ class HighLevelCommanderServer(ABC):
             yaw (float): _description_
             duration_seconds (float): _description_
         """
-        pass
+        self.__warn_not_implemented("go_to")
 
     @abstractmethod
     def start_trajectory(
@@ -197,11 +198,11 @@ class HighLevelCommanderServer(ABC):
         reversed: bool,
         relative: bool,
     ) -> None:
-        pass
+        self.__warn_not_implemented("start_trajectory")
 
     @abstractmethod
     def define_trajectory(self, trajectory_id: int, piece_offset: int) -> None:
-        pass
+        self.__warn_not_implemented("define_trajectory")
 
     @abstractmethod
     def takeoff_with_velocity(
@@ -213,7 +214,7 @@ class HighLevelCommanderServer(ABC):
         use_current_yaw: bool,
         velocity: float,
     ) -> None:
-        pass
+        self.__warn_not_implemented("takeoff_with_velocity")
 
     @abstractmethod
     def land_with_velocity(
@@ -225,7 +226,7 @@ class HighLevelCommanderServer(ABC):
         use_current_yaw: bool,
         velocity: float,
     ) -> None:
-        pass
+        self.__warn_not_implemented("land_with_velocity")
 
     @abstractmethod
     def spiral(
@@ -239,7 +240,7 @@ class HighLevelCommanderServer(ABC):
         dz: float,
         duration_seconds: float,
     ) -> None:
-        pass
+        self.__warn_not_implemented("spiral")
 
     # Callback functions for ros2 topics:
 
@@ -318,4 +319,9 @@ class HighLevelCommanderServer(ABC):
             msg.rf,
             msg.dz,
             duration_seconds,
+        )
+
+    def __warn_not_implemented(self, function_name: str) -> None:
+        self.node.get_logger().warn(
+            "There is no server-side implementation for {}!".format(function_name)
         )

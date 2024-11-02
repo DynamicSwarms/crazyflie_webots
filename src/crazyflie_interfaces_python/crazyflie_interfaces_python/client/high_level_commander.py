@@ -20,7 +20,7 @@ from crazyflie_interfaces.msg import (
 from typing import List
 
 
-class HighLevelCommanderInterface:
+class HighLevelCommanderClient:
 
     def __init__(self, node: Node, prefix: str):
         callback_group = MutuallyExclusiveCallbackGroup()
