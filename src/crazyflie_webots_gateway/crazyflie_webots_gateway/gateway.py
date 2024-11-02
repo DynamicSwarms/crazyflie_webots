@@ -1,20 +1,19 @@
-import asyncio
 import os
+import asyncio
+from asyncio.subprocess import Process
+from signal import SIGINT
+
+from ament_index_python.packages import get_package_share_directory, get_package_prefix
+from launch.substitutions import EnvironmentVariable
+from launch import LaunchContext
 
 import rclpy
 from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from crazyflie_webots_gateway_interfaces.srv import WebotsCrazyflie
-from ament_index_python.packages import get_package_share_directory, get_package_prefix
 
-from launch.substitutions import EnvironmentVariable
-from launch import LaunchContext
-
-from signal import SIGINT
 from typing import Dict
-
-from asyncio.subprocess import Process
 
 
 class Gateway(Node):
