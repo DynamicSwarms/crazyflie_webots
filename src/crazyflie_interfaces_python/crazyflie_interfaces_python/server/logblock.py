@@ -11,24 +11,24 @@ class LogBlockServer:
 
     def __init__(self, node: Node, name: str):
         self.node = node
-        self._log_block_start_callback = None
-        self._log_block_stop_callback = None
+        self._log_block_start_callback: Callable[[int], None] = None
+        self._log_block_stop_callback: Callable[[], None] = None
         callback_group = MutuallyExclusiveCallbackGroup()
         qos_profile = 10
         namespace = "~/log/{}/".format(name)
 
         node.create_subscription(
             Int16,
-            self._start_log_block,
             namespace + "start",
+            self._start_log_block,
             qos_profile=qos_profile,
             callback_group=callback_group,
         )
 
         node.create_subscription(
             Empty,
-            self._stop_log_block,
             namespace + "stop",
+            self._stop_log_block,
             qos_profile=qos_profile,
             callback_group=callback_group,
         )
@@ -40,10 +40,10 @@ class LogBlockServer:
             callback_group=callback_group,
         )
 
-    def set_log_block_start_callback(self, callback: Callable[[int],]) -> None:
+    def set_log_block_start_callback(self, callback: Callable[[int], None]) -> None:
         self._log_block_start_callback = callback
 
-    def set_log_block_stop_callback(self, callback: Callable[[],]) -> None:
+    def set_log_block_stop_callback(self, callback: Callable[[], None]) -> None:
         self._log_block_stop_callback = callback
 
     def send_data(self, values: List[float]):

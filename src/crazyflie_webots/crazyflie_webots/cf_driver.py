@@ -1,7 +1,4 @@
-from crazyflie_interfaces.msg._set_group_mask import SetGroupMask
-import rclpy
 from crazyflie_webots.wb_ros_driver import WebotsRosDriver
-from crazyflie_interfaces.msg import Position, Land, Takeoff, GoTo, GenericLogData
 
 from crazyflie_driver.high_level_commander import WebotsHighLevelCommander
 from crazyflie_driver.generic_commander import WebotsGenericCommander
@@ -9,7 +6,7 @@ from crazyflie_driver.rpyt_commander import WebotsRPYTCommander
 from crazyflie_driver.logging import WebotsLogging
 from crazyflie_driver.parameters import WebotsParameters
 
-
+from crazyflie_interfaces_python.server.logblock import LogBlockServer
 from typing import List
 
 
@@ -18,8 +15,6 @@ class CrazyflieDriverNode(WebotsRosDriver):
         super().init(webots_node, properties)
         self.target_field = self.wb_node.getField("target")
         self.range_finder = self.wb_node.getField("zrange")
-
-        name = str(self.getName())
 
         hl_commander = WebotsHighLevelCommander(
             self.ros_node, self.set_target, self.get_position
@@ -31,23 +26,15 @@ class CrazyflieDriverNode(WebotsRosDriver):
 
         rpyt_commander = WebotsRPYTCommander(self.ros_node)
 
+        parameters = WebotsParameters(self.ros_node)
+
         logging_variables = {"range.zrange": self.get_zrange}
         logging = WebotsLogging(self.ros_node, logging_variables)
 
-        parameters = WebotsParameters(self.ros_node)
+        # block = LogBlockServer(self.ros_node, "zrange")
+        # logging.create_log_block(["range.zrange"], block)
+        # block._log_block_start_callback(200)
 
-        logging.add_block(0, [{"group": "range", "name": "zrange"}])
-        logging.start_block(0, 50, "zrange")
-
-        # self.zrange_timer = self.ros_node.create_timer(
-        #    1.0 / 20.0, self.z_range_timer_callback
-        # )
-
-    # def z_range_timer_callback(self):
-    #    msg = GenericLogData()
-    #    msg.values.append(self.range_finder.getSFFloat())
-    #    self.zrange_pub.publish(msg)
-    #
     def get_zrange(self) -> float:
         return self.range_finder.getSFFloat()
 

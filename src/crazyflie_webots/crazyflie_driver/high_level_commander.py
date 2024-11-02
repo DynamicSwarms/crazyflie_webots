@@ -57,3 +57,59 @@ class WebotsHighLevelCommander(HighLevelCommanderServer):
         duration_seconds: float,
     ) -> None:
         self.set_target([x, y, z])
+
+    def start_trajectory(
+        self,
+        group_mask: int,
+        trajectory_id: int,
+        timescale: float,
+        reversed: bool,
+        relative: bool,
+    ) -> None:
+        return super().start_trajectory(
+            group_mask, trajectory_id, timescale, reversed, relative
+        )
+
+    def define_trajectory(self, trajectory_id: int, piece_offset: int) -> None:
+        return super().define_trajectory(trajectory_id, piece_offset)
+
+    def takeoff_with_velocity(
+        self,
+        group_mask: int,
+        height: float,
+        height_is_relative: bool,
+        yaw: float,
+        use_current_yaw: bool,
+        velocity: float,
+    ) -> None:
+        return super().takeoff_with_velocity(
+            group_mask, height, height_is_relative, yaw, use_current_yaw, velocity
+        )
+
+    def land_with_velocity(
+        self,
+        group_mask: int,
+        height: float,
+        height_is_relative: bool,
+        yaw: float,
+        use_current_yaw: bool,
+        velocity: float,
+    ) -> None:
+        return super().land_with_velocity(
+            group_mask, height, height_is_relative, yaw, use_current_yaw, velocity
+        )
+
+    def spiral(
+        self,
+        group_mask: int,
+        sidways: bool,
+        clockwise: bool,
+        phi: float,
+        r0: float,
+        rf: float,
+        dz: float,
+        duration_seconds: float,
+    ) -> None:
+        return super().spiral(
+            group_mask, sidways, clockwise, phi, r0, rf, dz, duration_seconds
+        )

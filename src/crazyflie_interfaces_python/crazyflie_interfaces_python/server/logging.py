@@ -42,14 +42,6 @@ class LoggingServer(ABC):
         )
 
     @abstractmethod
-    def start_block(self, id: int, period: int) -> None:
-        self.__warn_not_implemented("start_block")
-
-    @abstractmethod
-    def add_block(self, id: int, elements: List[tuple]) -> None:
-        self.__warn_not_implemented("stop_block")
-
-    @abstractmethod
     def download_toc(self) -> None:
         self.__warn_not_implemented("download toc")
 
@@ -68,8 +60,7 @@ class LoggingServer(ABC):
         self.get_toc_info()
 
     def _create_log_block(self, msg: LogBlock) -> None:
-
-        self.create_log_block(msg.variables)
+        self.create_log_block(msg.variables, LogBlockServer(self.node, msg.name))
 
     def __warn_not_implemented(self, function_name: str) -> None:
         self.node.get_logger().warn(
