@@ -1,46 +1,45 @@
-import rclpy
 from crazyflie_webots.wb_ros_driver import WebotsRosDriver
 
-from crazyflie_interfaces.msg import Position, Land, Takeoff, GoTo, GenericLogData
+from crazyflie_driver.high_level_commander import WebotsHighLevelCommander
+from crazyflie_driver.generic_commander import WebotsGenericCommander
+from crazyflie_driver.rpyt_commander import WebotsRPYTCommander
+from crazyflie_driver.logging import WebotsLogging
+from crazyflie_driver.parameters import WebotsParameters
+
+from crazyflie_interfaces_python.server.logblock import LogBlockServer
+from typing import List
+
 
 class CrazyflieDriverNode(WebotsRosDriver):
     def init(self, webots_node, properties):
         super().init(webots_node, properties)
-        self.target_field = self.wb_node.getField('target')
-        self.range_finder = self.wb_node.getField('zrange')
-        
+        self.target_field = self.wb_node.getField("target")
+        self.range_finder = self.wb_node.getField("zrange")
 
-        name = str(self.getName())
-        self.ros_node.create_subscription(Position, name + '/cmd_position', self.cmd_position, 1)
-        self.ros_node.create_subscription(Land, name + '/land', self.land, 1)
-        self.ros_node.create_subscription(Takeoff, name + '/takeoff', self.takeoff, 1)
-        self.ros_node.create_subscription(GoTo, name + '/go_to', self.go_to, 1)
+        hl_commander = WebotsHighLevelCommander(
+            self.ros_node, self.set_target, self.get_position
+        )
 
-        self.zrange_pub = self.ros_node.create_publisher(GenericLogData, name + '/zrange', 10)
-        self.zrange_timer = self.ros_node.create_timer(1.0/20.0, self.z_range_timer_callback)
+        generic_commander = WebotsGenericCommander(
+            self.ros_node, self.set_target, self.get_position
+        )
 
-    def cmd_position(self, position):
-        self.set_target([position.x, position.y, position.z])
+        rpyt_commander = WebotsRPYTCommander(self.ros_node)
 
-    def land(self, land):
-        pos = self.get_position()
-        self.set_target([pos[0], pos[1], land.height + 0.02])
+        parameters = WebotsParameters(self.ros_node)
 
-    def takeoff(self, takeoff):
-        pos = self.get_position()
-        self.set_target([pos[0], pos[1], takeoff.height])
+        logging_variables = {"range.zrange": self.get_zrange}
+        logging = WebotsLogging(self.ros_node, logging_variables)
 
-    def go_to(self, goto):
-        self.set_target([goto.goal.x, goto.goal.y, goto.goal.z])
-    
-    def set_target(self, target):
+        # block = LogBlockServer(self.ros_node, "zrange")
+        # logging.create_log_block(["range.zrange"], block)
+        # block._log_block_start_callback(200)
+
+    def get_zrange(self) -> float:
+        return self.range_finder.getSFFloat()
+
+    def set_target(self, target: List[float]) -> None:
         self.target_field.setSFVec3f(target)
-
-    def z_range_timer_callback(self):
-        msg = GenericLogData()
-        msg.values.append(self.range_finder.getSFFloat())
-        self.zrange_pub.publish(msg)
 
     def step(self):
         super().step()
-        
