@@ -16,32 +16,45 @@ from typing import List
 class GenericCommanderServer(ABC):
     def __init__(self, node: Node):
         callback_group = MutuallyExclusiveCallbackGroup()
+        qos_profile = 10
 
         node.create_subscription(
             NotifySetpointsStop,
             "~/notify_setpoints_stop",
             self._notify_setpoints_stop,
-            10,
+            qos_profile=qos_profile,
             callback_group=callback_group,
         )
+
         node.create_subscription(
-            VelocityWorld, "~/cmd_vel", self._cmd_vel, 10, callback_group=callback_group
+            VelocityWorld,
+            "~/cmd_vel",
+            self._cmd_vel,
+            qos_profile=qos_profile,
+            callback_group=callback_group,
         )
+
         node.create_subscription(
-            Hover, "~/cmd_hover", self._cmd_hover, 10, callback_group=callback_group
+            Hover,
+            "~/cmd_hover",
+            self._cmd_hover,
+            qos_profile=qos_profile,
+            callback_group=callback_group,
         )
+
         node.create_subscription(
             FullState,
             "~/cmd_full_state",
             self._cmd_full_state,
-            10,
+            qos_profile=qos_profile,
             callback_group=callback_group,
         )
+
         node.create_subscription(
             Position,
             "~/cmd_position",
             self._cmd_position,
-            10,
+            qos_profile=qos_profile,
             callback_group=callback_group,
         )
 
@@ -95,7 +108,7 @@ class GenericCommanderServer(ABC):
         velocity: List[int],
         acceleration: List[int],
         orienation: List[int],
-        rates: List[int],
+        angular_rate: List[int],
     ) -> None:
         """TODO
 
@@ -139,8 +152,10 @@ class GenericCommanderServer(ABC):
             msg.pose.orientation.z,
             msg.pose.orientation.y,
         ]
-        rates = [msg.twist.angular.x, msg.twist.angular.y, msg.twist.angular.z]
-        self.full_state_setpoint(position, velocity, acceleration, orientation, rates)
+        angular_rate = [msg.twist.angular.x, msg.twist.angular.y, msg.twist.angular.z]
+        self.full_state_setpoint(
+            position, velocity, acceleration, orientation, angular_rate
+        )
 
     def _cmd_position(self, msg: Position) -> None:
         self.position_setpoint(msg.x, msg.y, msg.z, msg.yaw)
