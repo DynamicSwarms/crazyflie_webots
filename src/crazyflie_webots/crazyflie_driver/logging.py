@@ -43,7 +43,8 @@ class WebotsLogging(LoggingServer):
 
     def start_block(self, id: int, period_ms: int) -> None:
         self.timers[id] = self.node.create_timer(
-            timer_period_sec=float(period_ms) / 1000.0,
+            timer_period_sec=float(period_ms)
+            / (1000.0 / 10),  # the value is period_ms / 10
             callback=lambda id=id: self.send_block_data(id),
         )
 

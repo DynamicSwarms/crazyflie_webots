@@ -15,6 +15,9 @@ class CrazyflieDriverNode(WebotsRosDriver):
         super().init(webots_node, properties)
         self.target_field = self.wb_node.getField("target")
         self.range_finder = self.wb_node.getField("zrange")
+        self.vbat_field = self.wb_node.getField("vbat")
+        self.charge_current_field = self.wb_node.getField("chargeCurrent")
+        self.pm_state_field = self.wb_node.getField("pm_state")
 
         hl_commander = WebotsHighLevelCommander(
             self.ros_node, self.set_target, self.get_position
@@ -28,7 +31,19 @@ class CrazyflieDriverNode(WebotsRosDriver):
 
         parameters = WebotsParameters(self.ros_node)
 
-        logging_variables = {"range.zrange": self.get_zrange}
+        logging_variables = {
+            "range.zrange": self.get_zrange,
+            "stateEstimate.x": lambda: self.get_position()[0],
+            "stateEstimate.y": lambda: self.get_position()[1],
+            "stateEstimate.z": lambda: self.get_position()[2],
+        }
+        if self.vbat_field is not None:
+            logging_variables["pm.vbat"] = self.get_vbat
+        if self.charge_current_field is not None:
+            logging_variables["pm.chargeCurrent"] = self.get_charge_current
+        if self.pm_state_field is not None:
+            logging_variables["pm.state"] = self.get_pm_state
+
         logging = WebotsLogging(self.ros_node, logging_variables)
 
         # block = LogBlockServer(self.ros_node, "zrange")
@@ -40,6 +55,21 @@ class CrazyflieDriverNode(WebotsRosDriver):
 
     def set_target(self, target: List[float]) -> None:
         self.target_field.setSFVec3f(target)
+
+    def get_vbat(self) -> float:
+        if self.vbat_field is not None:
+            return self.vbat_field.getSFFloat()
+        return 0.0
+
+    def get_charge_current(self) -> float:
+        if self.charge_current_field is not None:
+            return self.charge_current_field.getSFFloat()
+        return 0.0
+
+    def get_pm_state(self) -> float:
+        if self.pm_state_field is not None:
+            return float(self.pm_state_field.getSFInt32())
+        return 0.0
 
     def step(self):
         super().step()
