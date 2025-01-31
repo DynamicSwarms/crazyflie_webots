@@ -178,6 +178,7 @@ async def run_node(cf_eventloop):
         rclpy.shutdown()
     except asyncio.CancelledError:
         gateway.remove_all_crazyflies()
+    rclpy.try_shutdown()
 
 
 def run_crazyflie_loop(event_loop: asyncio.AbstractEventLoop):
