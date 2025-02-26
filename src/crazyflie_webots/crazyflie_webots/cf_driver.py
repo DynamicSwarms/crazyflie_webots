@@ -7,12 +7,17 @@ from crazyflie_driver.logging import WebotsLogging
 from crazyflie_driver.parameters import WebotsParameters
 
 from crazyflie_interfaces_python.server.logblock import LogBlockServer
+
+from geometry_msgs.msg import PoseArray, PoseStamped
+from tf_transformations import quaternion_about_axis
+from crazyflie_interfaces.msg import PoseStampedArray
+
 from typing import List
 
 
 class CrazyflieDriverNode(WebotsRosDriver):
     def init(self, webots_node, properties):
-        super().init(webots_node, properties)
+        super().init(webots_node, properties, tf_publishing=False)
         self.target_field = self.wb_node.getField("target")
         self.range_finder = self.wb_node.getField("zrange")
         self.vbat_field = self.wb_node.getField("vbat")
@@ -49,6 +54,33 @@ class CrazyflieDriverNode(WebotsRosDriver):
         # block = LogBlockServer(self.ros_node, "zrange")
         # logging.create_log_block(["range.zrange"], block)
         # block._log_block_start_callback(200)
+        self.pose_publisher = self.ros_node.create_publisher(
+            msg_type=PoseStampedArray, topic="cf_positions", qos_profile=1
+        )
+
+        self.ros_node.create_timer(1 / 10.0, self.publish_pose)
+
+    def publish_pose(self):
+        pos = self.get_position()
+        rot = self.get_rotation()
+        quat = quaternion_about_axis(rot[3], rot[:3])
+
+        pose = PoseStamped()
+        pose.pose.position.x, pose.pose.position.y, pose.pose.position.z = pos
+        (
+            pose.pose.orientation.x,
+            pose.pose.orientation.y,
+            pose.pose.orientation.z,
+            pose.pose.orientation.w,
+        ) = quat
+        pose.header.frame_id = self.getName()
+        pose.header.stamp = self.ros_node.get_clock().now().to_msg()
+
+        msg = PoseStampedArray()
+        msg.header.stamp = self.ros_node.get_clock().now().to_msg()
+        msg.header.frame_id = "world"
+        msg.poses = [pose]
+        self.pose_publisher.publish(msg)
 
     def get_zrange(self) -> float:
         return self.range_finder.getSFFloat()

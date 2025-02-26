@@ -11,7 +11,7 @@ from typing import List, Dict
 class WebotsRosDriver:
     num: int = 0
 
-    def init(self, webots_node, properties):
+    def init(self, webots_node, properties, tf_publishing: bool = True):
         self.num += 1
         self.wb_node = self.getNode(webots_node)
         rclpy.init(args=None)
@@ -21,7 +21,8 @@ class WebotsRosDriver:
         self.tf_broadcaster = TransformBroadcaster(self.ros_node)
 
         self.log("Node started for " + str(self.getName()))
-        self.ros_node.create_timer(1 / 10.0, self.broadcast_position)
+        if tf_publishing:
+            self.ros_node.create_timer(1 / 10.0, self.broadcast_position)
 
     def step(self):
         rclpy.spin_once(self.ros_node, timeout_sec=0)
