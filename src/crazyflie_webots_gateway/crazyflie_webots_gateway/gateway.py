@@ -164,7 +164,7 @@ class Gateway(Node):
     def _remove_crazyflie_callback(
         self, req: WebotsCrazyflie.Request, resp: WebotsCrazyflie.Response
     ) -> WebotsCrazyflie.Response:
-        resp.success = self.remove_crazyflie(req.id)
+        resp.success, _msg = self.remove_crazyflie(req.id)
         return resp
 
 
