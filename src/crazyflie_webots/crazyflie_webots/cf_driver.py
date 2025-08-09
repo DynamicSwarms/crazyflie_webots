@@ -11,7 +11,7 @@ from crazyflie_interfaces_python.server.logblock import LogBlockServer
 from geometry_msgs.msg import PoseArray, PoseStamped
 from tf_transformations import quaternion_about_axis
 from crazyflie_interfaces.msg import PoseStampedArray
-
+from crazyflie_interfaces.msg import GenericLogData
 from typing import List
 
 
@@ -58,9 +58,17 @@ class CrazyflieDriverNode(WebotsRosDriver):
             msg_type=PoseStampedArray, topic="cf_positions", qos_profile=1
         )
 
+        self.battery_publisher = self.ros_node.create_publisher(
+            msg_type=GenericLogData, topic="~/state", qos_profile=1
+        )
+
         self.ros_node.create_timer(1 / 10.0, self.publish_pose)
 
     def publish_pose(self):
+        state = GenericLogData()
+        state.values.append(4.2)  # Always full battery
+        self.battery_publisher.publish(state)
+
         pos = self.get_position()
         rot = self.get_rotation()
         quat = quaternion_about_axis(rot[3], rot[:3])

@@ -6,7 +6,6 @@ from typing import List, Callable
 
 
 class WebotsHighLevelCommander(HighLevelCommanderServer):
-
     def __init__(
         self,
         ros_node: Node,
@@ -56,6 +55,11 @@ class WebotsHighLevelCommander(HighLevelCommanderServer):
         yaw: float,
         duration_seconds: float,
     ) -> None:
+        if relative:
+            pos = self.get_position()
+            x += pos[0]
+            y += pos[1]
+            z += pos[2]
         self.set_target([x, y, z])
 
     def start_trajectory(
