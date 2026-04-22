@@ -10,7 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
-find_package(crazyflie_webots_gateway_interfaces REQUIRED)
+find_package(crazyflie_interfaces REQUIRED)
 
 add_executable(gateway src/gateway.cpp)
 target_include_directories(gateway PUBLIC
@@ -20,7 +20,7 @@ target_compile_features(gateway PUBLIC c_std_99 cxx_std_17)  # Require C99 and C
 
 ament_target_dependencies(gateway
   rclcpp
-  crazyflie_webots_gateway_interfaces)
+  crazyflie_interfaces)
 
 
 set(GATEWAY_DEPS

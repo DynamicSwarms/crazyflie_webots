@@ -13,7 +13,7 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>lifecycle_msgs</depend>
-  <depend>crazyflie_webots_gateway_interfaces</depend>
+  <depend>crazyflie_interfaces</depend>
 
 
   <test_depend>ament_lint_auto</test_depend>

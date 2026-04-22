@@ -3,13 +3,21 @@
 #include <map>
 #include <sys/wait.h>    
 #include "rclcpp/rclcpp.hpp"
-#include "crazyflie_webots_gateway_interfaces/srv/webots_crazyflie.hpp"
+
+#include "crazyflie_interfaces/srv/add_crazyflie.hpp"
+#include "crazyflie_interfaces/srv/remove_crazyflie.hpp"
 
 #include "crazyflie_webots_gateway/crazyflie_lifecycle_client.hpp"
 
 
 #include "signal.h"
 
+class GatewayException : public std::runtime_error
+{
+public:
+  explicit GatewayException(const std::string & error_desc)
+  : std::runtime_error(error_desc) {}
+};
 
 std::atomic_bool sigint_received(false);
 std::atomic_bool gateway_shutdown_done(false);
@@ -29,13 +37,13 @@ public:
       auto service_qos = rmw_qos_profile_services_default;
       service_qos.depth = 100; // This way it is possible to queue up multiple add requestst
       m_gateway_callback_group = this->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
-      m_add_crazyflie_service = this->create_service<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie>(
+      m_add_crazyflie_service = this->create_service<crazyflie_interfaces::srv::AddCrazyflie>(
         "~/add_crazyflie",
         std::bind(&Gateway::add_crazyflie_callback, this, std::placeholders::_1, std::placeholders::_2),
         service_qos,
         m_gateway_callback_group);
       
-      m_remove_crazyflie_service = this->create_service<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie>(
+      m_remove_crazyflie_service = this->create_service<crazyflie_interfaces::srv::RemoveCrazyflie>(
         "~/remove_crazyflie",
         std::bind(&Gateway::remove_crazyflie_callback, this, std::placeholders::_1, std::placeholders::_2),
         service_qos,
@@ -89,10 +97,17 @@ public:
     }
 
     void add_crazyflie_callback(
-      const std::shared_ptr<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie::Request> request,
-      std::shared_ptr<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie::Response> response)
+      const std::shared_ptr<crazyflie_interfaces::srv::AddCrazyflie::Request> request,
+      std::shared_ptr<crazyflie_interfaces::srv::AddCrazyflie::Response> response)
     {
-      int id = request->id;
+      int id;
+      try {
+        id = uri_to_id(request->uri);
+      } catch (const GatewayException & e) {
+          response->success = false;
+          response->msg = e.what();
+          return;
+      }
       RCLCPP_INFO(this->get_logger(), "Adding crazyflie with id: %d.", id);
 
       {
@@ -155,12 +170,20 @@ public:
     }
 
     void remove_crazyflie_callback(
-      const std::shared_ptr<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie::Request> request,
-      std::shared_ptr<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie::Response> response)
+      const std::shared_ptr<crazyflie_interfaces::srv::RemoveCrazyflie::Request> request,
+      std::shared_ptr<crazyflie_interfaces::srv::RemoveCrazyflie::Response> response)
     {
       std::unique_lock<std::mutex> lock(m_crazyflie_processes_mutex);
 
-      int id = request->id;
+      int id;
+      try {
+        id = uri_to_id(request->uri);
+      } catch (const GatewayException & e) {
+          response->success = false;
+          response->msg = e.what();
+          return;
+      }
+
       RCLCPP_INFO(this->get_logger(), "Remove crazyflie service called for id: %d.", id);
 
       response->success = true;
@@ -216,6 +239,22 @@ public:
       }      
     }
 
+private: 
+    int 
+    uri_to_id(const std::string & uri)
+    {
+      const std::string prefix = "webots://";
+      if (uri.rfind(prefix, 0) != 0) {
+          throw GatewayException("URI must start with webots://");
+      }
+
+      try {
+          return std::stoi(uri.substr(prefix.length()));
+      } catch (...) {
+          throw GatewayException("ID must be an integer");
+      }
+    }
+
 
 private: 
     std::shared_ptr<rclcpp::CallbackGroup> m_lifecycle_client_callback_group;
@@ -224,8 +263,8 @@ private:
     std::shared_ptr<rclcpp::TimerBase> m_shutdown_detector_timer;
 
     std::shared_ptr<rclcpp::CallbackGroup> m_gateway_callback_group;
-    std::shared_ptr<rclcpp::Service<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie>> m_add_crazyflie_service;
-    std::shared_ptr<rclcpp::Service<crazyflie_webots_gateway_interfaces::srv::WebotsCrazyflie>> m_remove_crazyflie_service; 
+    std::shared_ptr<rclcpp::Service<crazyflie_interfaces::srv::AddCrazyflie>> m_add_crazyflie_service;
+    std::shared_ptr<rclcpp::Service<crazyflie_interfaces::srv::RemoveCrazyflie>> m_remove_crazyflie_service; 
     
     std::shared_ptr<rclcpp::TimerBase> m_check_crazyflie_processes_timer;
 
